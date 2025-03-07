@@ -6,12 +6,12 @@ import FilterControls, { FilterState } from "@/components/FilterControls";
 import { useToast } from "@/components/ui/use-toast";
 import { ShieldAlert, Check, Clock, AlertTriangle, AlertCircle, Info } from "lucide-react";
 import { ChatAlert } from "@/types";
-import { fetchAlerts } from "@/services/alertService";
-import { useQuery } from "@tanstack/react-query";
+import { fetchAlerts, updateAlertReviewStatus } from "@/services/alertService";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const { toast } = useToast();
-  const [alerts, setAlerts] = useState<ChatAlert[]>([]);
+  const queryClient = useQueryClient();
   const [filters, setFilters] = useState<FilterState>({
     search: "",
     severity: ["high", "medium", "low"],
@@ -20,29 +20,41 @@ const Dashboard = () => {
   });
 
   // Fetch alerts using React Query
-  const { data: fetchedAlerts, isLoading, error } = useQuery({
+  const { data: alerts = [], isLoading, error } = useQuery({
     queryKey: ['alerts'],
     queryFn: fetchAlerts,
   });
 
-  // Update local state when data is fetched
-  useEffect(() => {
-    if (fetchedAlerts) {
-      setAlerts(fetchedAlerts);
-    }
-  }, [fetchedAlerts]);
+  // Mutation for updating alert review status
+  const updateReviewMutation = useMutation({
+    mutationFn: ({ id, reviewed }: { id: string, reviewed: boolean }) => 
+      updateAlertReviewStatus(id, reviewed),
+    onSuccess: () => {
+      // Invalidate and refetch alerts after a successful update
+      queryClient.invalidateQueries({ queryKey: ['alerts'] });
+    },
+  });
 
   const handleAlertReviewToggle = (id: string, reviewed: boolean) => {
-    setAlerts(
-      alerts.map((alert) =>
-        alert.id === id ? { ...alert, reviewed } : alert
-      )
-    );
+    // Optimistically update the UI
+    const alertToUpdate = alerts.find(alert => alert.id === id);
     
-    toast({
-      title: reviewed ? "Alert marked as reviewed" : "Alert marked as pending",
-      description: `Alert for ${alerts.find(a => a.id === id)?.childName} has been updated`,
-      duration: 3000,
+    updateReviewMutation.mutate({ id, reviewed }, {
+      onSuccess: () => {
+        toast({
+          title: reviewed ? "Alert marked as reviewed" : "Alert marked as pending",
+          description: `Alert for ${alertToUpdate?.childName} has been updated`,
+          duration: 3000,
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Update failed",
+          description: "There was an error updating the alert status",
+          variant: "destructive",
+          duration: 3000,
+        });
+      },
     });
   };
 

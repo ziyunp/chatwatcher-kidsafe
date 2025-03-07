@@ -9,35 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      Alert: {
+      ChatAlert: {
         Row: {
+          aiPlatform: string | null
           alertReason: string | null
           chatHistory: string | null
           childId: string
           childName: string | null
           id: string
-          sessionEnd: string | null
-          sessionStart: string | null
+          reviewed: boolean | null
+          severity: string | null
           topic: string | null
         }
         Insert: {
+          aiPlatform?: string | null
           alertReason?: string | null
           chatHistory?: string | null
           childId: string
           childName?: string | null
           id: string
-          sessionEnd?: string | null
-          sessionStart?: string | null
+          reviewed?: boolean | null
+          severity?: string | null
           topic?: string | null
         }
         Update: {
+          aiPlatform?: string | null
           alertReason?: string | null
           chatHistory?: string | null
           childId?: string
           childName?: string | null
           id?: string
-          sessionEnd?: string | null
-          sessionStart?: string | null
+          reviewed?: boolean | null
+          severity?: string | null
           topic?: string | null
         }
         Relationships: []
