@@ -1,21 +1,36 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Layout from "@/components/Layout";
 import AlertCard from "@/components/AlertCard";
 import FilterControls, { FilterState } from "@/components/FilterControls";
-import { mockAlerts } from "@/data/mockData";
 import { useToast } from "@/components/ui/use-toast";
 import { ShieldAlert, Check, Clock, AlertTriangle, AlertCircle, Info } from "lucide-react";
+import { ChatAlert } from "@/types";
+import { fetchAlerts } from "@/services/alertService";
+import { useQuery } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const { toast } = useToast();
-  const [alerts, setAlerts] = useState(mockAlerts);
+  const [alerts, setAlerts] = useState<ChatAlert[]>([]);
   const [filters, setFilters] = useState<FilterState>({
     search: "",
     severity: ["high", "medium", "low"],
     showReviewed: true,
     showUnreviewed: true,
   });
+
+  // Fetch alerts using React Query
+  const { data: fetchedAlerts, isLoading, error } = useQuery({
+    queryKey: ['alerts'],
+    queryFn: fetchAlerts,
+  });
+
+  // Update local state when data is fetched
+  useEffect(() => {
+    if (fetchedAlerts) {
+      setAlerts(fetchedAlerts);
+    }
+  }, [fetchedAlerts]);
 
   const handleAlertReviewToggle = (id: string, reviewed: boolean) => {
     setAlerts(
@@ -106,7 +121,21 @@ const Dashboard = () => {
           
           <FilterControls onFilterChange={setFilters} />
           
-          {filteredAlerts.length > 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <p>Loading alerts...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="rounded-full bg-red-100 p-3 mb-3">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="font-medium mb-1">Error loading alerts</h3>
+              <p className="text-sm text-muted-foreground">
+                There was a problem fetching the alert data
+              </p>
+            </div>
+          ) : filteredAlerts.length > 0 ? (
             <div className="space-y-4">
               {filteredAlerts.map((alert) => (
                 <AlertCard
