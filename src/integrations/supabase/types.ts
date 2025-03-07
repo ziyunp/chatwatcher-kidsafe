@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      Alert: {
+        Row: {
+          aiPlatform: string | null
+          childId: number | null
+          childName: string | null
+          conversation: Json | null
+          flaggedMessage: Json | null
+          id: number
+          reviewed: boolean | null
+          severity: string | null
+          timestamp: string
+        }
+        Insert: {
+          aiPlatform?: string | null
+          childId?: number | null
+          childName?: string | null
+          conversation?: Json | null
+          flaggedMessage?: Json | null
+          id?: number
+          reviewed?: boolean | null
+          severity?: string | null
+          timestamp?: string
+        }
+        Update: {
+          aiPlatform?: string | null
+          childId?: number | null
+          childName?: string | null
+          conversation?: Json | null
+          flaggedMessage?: Json | null
+          id?: number
+          reviewed?: boolean | null
+          severity?: string | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
       ChatAlert: {
         Row: {
           aiPlatform: string | null

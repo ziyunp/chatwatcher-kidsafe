@@ -1,5 +1,5 @@
 
-import { ChatAlert } from '../types';
+import { ChatAlert } from '@/types';
 
 export const mockAlerts: ChatAlert[] = [
   {
