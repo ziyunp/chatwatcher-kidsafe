@@ -35,10 +35,16 @@ const FilterControls = ({ onFilterChange }: FilterControlsProps) => {
     // Don't allow empty selection
     if (value.length === 0) return;
     
+    // Cast the string[] to AlertSeverity[] since we've validated that these values are valid
+    const severityValues = value.filter((v): v is AlertSeverity => 
+      v === 'high' || v === 'medium' || v === 'low'
+    );
+    
     const newFilters = { 
       ...filters, 
-      severity: value as AlertSeverity[] 
+      severity: severityValues 
     };
+    
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
@@ -62,7 +68,7 @@ const FilterControls = ({ onFilterChange }: FilterControlsProps) => {
   };
 
   const resetFilters = () => {
-    const defaultFilters = {
+    const defaultFilters: FilterState = {
       search: "",
       severity: ["high", "medium", "low"],
       showReviewed: true,
